@@ -1,0 +1,14 @@
+# Entorno virtual de Python
+/venv/
+__pycache__/
+
+# Archivos de datos y resultados
+*.csv
+/01_data/
+
+# Secretos y credenciales
+*.json
+
+# Power BI (subiremos solo la plantilla)
+*.pbix
+
