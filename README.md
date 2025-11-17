@@ -31,3 +31,41 @@ Para demostrar la capacidad de trabajar con herramientas de nube *reales* (como 
 | **Visualización** | **Power BI** | Herramienta líder de BI. Se usó **DirectQuery** para demostrar la conexión escalable con un Data Warehouse en la nube. |
 
 ## 4. Estructura del Repositorio
+
+. ├── 01_data/ # (Ignorado por .gitignore) Contiene los CSV crudos. ├── 02_notebooks/ │ ├── 01_ELT_Polars.ipynb # Notebook 1: Carga CSV, limpia con Polars, carga a BigQuery. │ └── 02_Analysis_BigQuery.ipynb # Notebook 2: Consulta BigQuery con SQL complejo, analiza. ├── 03_powerbi/ │ └── dashboard_logistica.pbix # Archivo de Power BI con los 3 dashboards. ├── .gitignore # Archivo de configuración de GIT (crucial). └── README.md # Esta documentación.
+
+## 5. Fases del Proyecto
+
+### Fase 1: ELT (Polars -> BigQuery)
+En el notebook `01_ELT_Polars.ipynb`:
+1.  **Extract:** Se lee el CSV de +240,000 filas usando `pl.read_csv()`.
+2.  **Transform:** Se limpian y tipifican las columnas. Se usa `pl.col("date").str.to_datetime()` para un parseo de fechas robusto y `pl.select()` para construir el esquema final.
+3.  **Load:** Se usa `client.load_table_from_dataframe()` para cargar el DataFrame de Polars (convertido a Pandas) directamente a la tabla `logistica_prod.rutas_clean` en BigQuery, sobrescribiendo (TRUNCATE) los datos anteriores para asegurar la idempotencia.
+
+### Fase 2: Análisis SQL (BigQuery)
+En el notebook `02_Analysis_BigQuery.ipynb`, se ejecutan consultas analíticas complejas para responder preguntas de negocio.
+
+
+Fase 3: Visualización (Power BI)
+Se creó un informe de 3 páginas conectado a BigQuery en modo DirectQuery para responder a preguntas clave de la gerencia:
+
+(Página 1: Resumen Ejecutivo) KPIs principales (Tasa de Éxito, Total Paquetes) y tendencia de demanda. (Inserta aquí una captura de pantalla de tu Página 1 del dashboard)
+
+(Página 2: Análisis de Eficiencia) Análisis de tiempos (Conducción vs. Parada), rendimiento de conductores y utilización de vehículos. (Inserta aquí una captura de pantalla de tu Página 2 del dashboard)
+
+(Página 3: Análisis de Factores Externos) Impacto del clima en la velocidad media y tasa de éxito; concentración de incidentes por barrio. (Inserta aquí una captura de pantalla de tu Página 3 del dashboard)
+
+6. Cómo Ejecutar este Proyecto
+Clonar el repositorio: git clone https://github.com/tu-usuario/logistics-analytics-pipeline.git
+
+Crear y activar un entorno virtual: python3 -m venv venv && source venv/bin/activate
+
+Instalar las dependencias: pip install jupyterlab polars "polars[rtcompat]" google-cloud-bigquery db-dtypes pyarrow google-cloud-bigquery-storage pandas-gbq
+
+Configurar la autenticación de GCP: gcloud auth login gcloud auth application-default login gcloud config set project logistics-prod-analysis
+
+Colocar el CSV de datos crudos en la carpeta 01_data/.
+
+Ejecutar jupyter-lab y correr los notebooks 01_ y 02_ en orden.
+
+Abrir el archivo .pbix de la carpeta 03_powerbi/ y actualizar las credenciales de BigQuery.
